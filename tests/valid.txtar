@@ -1,0 +1,408 @@
+XferLang 1.0 conformance suite: documents that must parse.
+Each case is <stem>.xfer, <stem>.canonical.xfer, <stem>.value.json. See README.md.
+Byte-level cases (BOM, CRLF, limits) are individual files under bytes/.
+
+-- 510-root-integer.xfer --
+42
+-- 510-root-integer.canonical.xfer --
+42
+-- 510-root-integer.value.json --
+{"root": {"type": "integer", "value": "42"}}
+-- 510-root-string.xfer --
+"just a string"
+-- 510-root-string.canonical.xfer --
+"just a string"
+-- 510-root-string.value.json --
+{"root": {"type": "string", "value": "just a string"}}
+-- 510-root-with-trivia.xfer --
+
+   </ leading comment />  [ 1 2 ]   </ trailing />
+
+-- 510-root-with-trivia.canonical.xfer --
+[
+    1
+    2
+]
+-- 510-root-with-trivia.value.json --
+{"root": {"type": "sequence", "value": [{"type": "integer", "value": "1"}, {"type": "integer", "value": "2"}]}}
+-- 530-object-basic.xfer --
+{ name "Alice" age 30 active true }
+-- 530-object-basic.canonical.xfer --
+{
+    name "Alice"
+    age 30
+    active true
+}
+-- 530-object-basic.value.json --
+{"root": {"type": "object", "value": {"name": {"type": "string", "value": "Alice"}, "age": {"type": "integer", "value": "30"}, "active": {"type": "bool", "value": "true"}}}}
+-- 530-object-empty.xfer --
+{}
+-- 530-object-empty.canonical.xfer --
+{}
+-- 530-object-empty.value.json --
+{"root": {"type": "object", "value": {}}}
+-- 530-object-minimal-whitespace.xfer --
+{a 1 b[1 2]c"x"d{e 2}}
+-- 530-object-minimal-whitespace.canonical.xfer --
+{
+    a 1
+    b [
+        1
+        2
+    ]
+    c "x"
+    d {
+        e 2
+    }
+}
+-- 530-object-minimal-whitespace.value.json --
+{"root": {"type": "object", "value": {"a": {"type": "integer", "value": "1"}, "b": {"type": "sequence", "value": [{"type": "integer", "value": "1"}, {"type": "integer", "value": "2"}]}, "c": {"type": "string", "value": "x"}, "d": {"type": "object", "value": {"e": {"type": "integer", "value": "2"}}}}}}
+-- 530-object-string-key.xfer --
+{ "first name" "Alice" "true" 1 "a.b" 2 }
+-- 530-object-string-key.canonical.xfer --
+{
+    "first name" "Alice"
+    "true" 1
+    a.b 2
+}
+-- 530-object-string-key.value.json --
+{"root": {"type": "object", "value": {"first name": {"type": "string", "value": "Alice"}, "true": {"type": "integer", "value": "1"}, "a.b": {"type": "integer", "value": "2"}}}}
+-- 530-object-key-order-preserved.xfer --
+{ z 1 a 2 m 3 }
+-- 530-object-key-order-preserved.canonical.xfer --
+{
+    z 1
+    a 2
+    m 3
+}
+-- 530-object-key-order-preserved.value.json --
+{"root": {"type": "object", "value": {"z": {"type": "integer", "value": "1"}, "a": {"type": "integer", "value": "2"}, "m": {"type": "integer", "value": "3"}}}}
+-- 530-object-hyphen-and-dot-keys.xfer --
+{ menu-id "site" window-commands true a.b.c 1 _private 2 }
+-- 530-object-hyphen-and-dot-keys.canonical.xfer --
+{
+    menu-id "site"
+    window-commands true
+    a.b.c 1
+    _private 2
+}
+-- 530-object-hyphen-and-dot-keys.value.json --
+{"root": {"type": "object", "value": {"menu-id": {"type": "string", "value": "site"}, "window-commands": {"type": "bool", "value": "true"}, "a.b.c": {"type": "integer", "value": "1"}, "_private": {"type": "integer", "value": "2"}}}}
+-- 530-object-unicode-keys.xfer --
+{ naïve 1 日本語 2 größe 3 }
+-- 530-object-unicode-keys.canonical.xfer --
+{
+    naïve 1
+    日本語 2
+    größe 3
+}
+-- 530-object-unicode-keys.value.json --
+{"root": {"type": "object", "value": {"naïve": {"type": "integer", "value": "1"}, "日本語": {"type": "integer", "value": "2"}, "größe": {"type": "integer", "value": "3"}}}}
+-- 540-sequence-heterogeneous.xfer --
+[ "Alice" 30 true null 2025-08-01 dark 1.5 ]
+-- 540-sequence-heterogeneous.canonical.xfer --
+[
+    "Alice"
+    30
+    true
+    null
+    2025-08-01
+    dark
+    1.5
+]
+-- 540-sequence-heterogeneous.value.json --
+{"root": {"type": "sequence", "value": [{"type": "string", "value": "Alice"}, {"type": "integer", "value": "30"}, {"type": "bool", "value": "true"}, {"type": "null"}, {"type": "date", "value": "2025-08-01"}, {"type": "symbol", "value": "dark"}, {"type": "fractional", "value": "1.5"}]}}
+-- 540-sequence-empty.xfer --
+[ ]
+-- 540-sequence-empty.canonical.xfer --
+[]
+-- 540-sequence-empty.value.json --
+{"root": {"type": "sequence", "value": []}}
+-- 540-sequence-nested.xfer --
+[ [ 1 2 ] [ 3 4 ] [ ] ]
+-- 540-sequence-nested.canonical.xfer --
+[
+    [
+        1
+        2
+    ]
+    [
+        3
+        4
+    ]
+    []
+]
+-- 540-sequence-nested.value.json --
+{"root": {"type": "sequence", "value": [{"type": "sequence", "value": [{"type": "integer", "value": "1"}, {"type": "integer", "value": "2"}]}, {"type": "sequence", "value": [{"type": "integer", "value": "3"}, {"type": "integer", "value": "4"}]}, {"type": "sequence", "value": []}]}}
+-- 410-comment-forms.xfer --
+</ one />{</ two />a</ three />1</ four />}</ five />
+-- 410-comment-forms.canonical.xfer --
+{
+    a 1
+}
+-- 410-comment-forms.value.json --
+{"root": {"type": "object", "value": {"a": {"type": "integer", "value": "1"}}}}
+-- 410-comment-nested-run.xfer --
+{
+    <// contains </ an inner comment /> safely //>
+    a 1
+    </// three ///>
+}
+-- 410-comment-nested-run.canonical.xfer --
+{
+    a 1
+}
+-- 410-comment-nested-run.value.json --
+{"root": {"type": "object", "value": {"a": {"type": "integer", "value": "1"}}}}
+-- 410-comment-disables-element.xfer --
+[ 1 </ 2 /> 3 </ { x [ 1 2 ] } /> ]
+-- 410-comment-disables-element.canonical.xfer --
+[
+    1
+    3
+]
+-- 410-comment-disables-element.value.json --
+{"root": {"type": "sequence", "value": [{"type": "integer", "value": "1"}, {"type": "integer", "value": "3"}]}}
+-- 410-comment-content-with-slashes.xfer --
+</ see https://example.com/path and a/b />42
+-- 410-comment-content-with-slashes.canonical.xfer --
+42
+-- 410-comment-content-with-slashes.value.json --
+{"root": {"type": "integer", "value": "42"}}
+-- 420-keywords.xfer --
+[ true false null inf -inf nan ]
+-- 420-keywords.canonical.xfer --
+[
+    true
+    false
+    null
+    inf
+    -inf
+    nan
+]
+-- 420-keywords.value.json --
+{"root": {"type": "sequence", "value": [{"type": "bool", "value": "true"}, {"type": "bool", "value": "false"}, {"type": "null"}, {"type": "fractional", "value": "inf"}, {"type": "fractional", "value": "-inf"}, {"type": "fractional", "value": "nan"}]}}
+-- 430-symbols.xfer --
+{ mode dark level info when window version v1.2.3 flag read-only cased True shout NULL }
+-- 430-symbols.canonical.xfer --
+{
+    mode dark
+    level info
+    when window
+    version v1.2.3
+    flag read-only
+    cased True
+    shout NULL
+}
+-- 430-symbols.value.json --
+{"root": {"type": "object", "value": {"mode": {"type": "symbol", "value": "dark"}, "level": {"type": "symbol", "value": "info"}, "when": {"type": "symbol", "value": "window"}, "version": {"type": "symbol", "value": "v1.2.3"}, "flag": {"type": "symbol", "value": "read-only"}, "cased": {"type": "symbol", "value": "True"}, "shout": {"type": "symbol", "value": "NULL"}}}}
+-- 440-string-plain-and-empty.xfer --
+[ "Hello, world" "" "a" ]
+-- 440-string-plain-and-empty.canonical.xfer --
+[
+    "Hello, world"
+    ""
+    "a"
+]
+-- 440-string-plain-and-empty.value.json --
+{"root": {"type": "sequence", "value": [{"type": "string", "value": "Hello, world"}, {"type": "string", "value": ""}, {"type": "string", "value": "a"}]}}
+-- 440-string-repetition.xfer --
+[ ""He said "hello" and left."" """Content with "" inside""" "Content with "" inside" ]
+-- 440-string-repetition.canonical.xfer --
+[
+    ""He said "hello" and left.""
+    """Content with "" inside"""
+    """Content with "" inside"""
+]
+-- 440-string-repetition.value.json --
+{"root": {"type": "sequence", "value": [{"type": "string", "value": "He said \"hello\" and left."}, {"type": "string", "value": "Content with \"\" inside"}, {"type": "string", "value": "Content with \"\" inside"}]}}
+-- 440-string-exact-matching-longer-run-is-content.xfer --
+"a""b"
+-- 440-string-exact-matching-longer-run-is-content.canonical.xfer --
+"""a""b"""
+-- 440-string-exact-matching-longer-run-is-content.value.json --
+{"root": {"type": "string", "value": "a\"\"b"}}
+-- 440-string-hash-run.xfer --
+[ #"say "hi""# #""To be, or not to be""# ##"a "# inside, and ends with #"## #""""# #""# ]
+-- 440-string-hash-run.canonical.xfer --
+[
+    #"say "hi""#
+    #""To be, or not to be""#
+    ##"a "# inside, and ends with #"##
+    #""""#
+    ""
+]
+-- 440-string-hash-run.value.json --
+{"root": {"type": "sequence", "value": [{"type": "string", "value": "say \"hi\""}, {"type": "string", "value": "\"To be, or not to be\""}, {"type": "string", "value": "a \"# inside, and ends with #"}, {"type": "string", "value": "\"\""}, {"type": "string", "value": ""}]}}
+-- 440-string-no-escapes.xfer --
+[ "^[a-z]+\d*$" "C:\Users\paul" "tab\there" ]
+-- 440-string-no-escapes.canonical.xfer --
+[
+    "^[a-z]+\d*$"
+    "C:\Users\paul"
+    "tab\there"
+]
+-- 440-string-no-escapes.value.json --
+{"root": {"type": "sequence", "value": [{"type": "string", "value": "^[a-z]+\\d*$"}, {"type": "string", "value": "C:\\Users\\paul"}, {"type": "string", "value": "tab\\there"}]}}
+-- 440-string-multiline-verbatim.xfer --
+{ text "First line.
+Second line.
+    Third line, indented four spaces in the value." }
+-- 440-string-multiline-verbatim.canonical.xfer --
+{
+    text "First line.
+Second line.
+    Third line, indented four spaces in the value."
+}
+-- 440-string-multiline-verbatim.value.json --
+{"root": {"type": "object", "value": {"text": {"type": "string", "value": "First line.\nSecond line.\n    Third line, indented four spaces in the value."}}}}
+-- 440-string-contains-comment-marker.xfer --
+{ a "</ not a comment />" b "<! not an annotation !>" }
+-- 440-string-contains-comment-marker.canonical.xfer --
+{
+    a "</ not a comment />"
+    b "<! not an annotation !>"
+}
+-- 440-string-contains-comment-marker.value.json --
+{"root": {"type": "object", "value": {"a": {"type": "string", "value": "</ not a comment />"}, "b": {"type": "string", "value": "<! not an annotation !>"}}}}
+-- 440-string-embedding-two-levels.xfer --
+{
+    modules [
+        """{
+    name "greeter"
+    script ""function greet(name) { console.log("Hello, " + name + "!"); }""
+}"""
+    ]
+}
+-- 440-string-embedding-two-levels.canonical.xfer --
+{
+    modules [
+        """{
+    name "greeter"
+    script ""function greet(name) { console.log("Hello, " + name + "!"); }""
+}"""
+    ]
+}
+-- 440-string-embedding-two-levels.value.json --
+{"root": {"type": "object", "value": {"modules": {"type": "sequence", "value": [{"type": "string", "value": "{\n    name \"greeter\"\n    script \"\"function greet(name) { console.log(\"Hello, \" + name + \"!\"); }\"\"\n}"}]}}}}
+-- 450-integers.xfer --
+[ 0 -0 42 -7 1_000_000 0xFF 0xff -0x1F 0o755 0b1010_1010 9_223_372_036_854_775_807 123456789012345678901234567890 ]
+-- 450-integers.canonical.xfer --
+[
+    0
+    -0
+    42
+    -7
+    1_000_000
+    0xff
+    0xff
+    -0x1f
+    0o755
+    0b1010_1010
+    9_223_372_036_854_775_807
+    123456789012345678901234567890
+]
+-- 450-integers.value.json --
+{"root": {"type": "sequence", "value": [{"type": "integer", "value": "0"}, {"type": "integer", "value": "0"}, {"type": "integer", "value": "42"}, {"type": "integer", "value": "-7"}, {"type": "integer", "value": "1000000"}, {"type": "integer", "value": "255"}, {"type": "integer", "value": "255"}, {"type": "integer", "value": "-31"}, {"type": "integer", "value": "493"}, {"type": "integer", "value": "170"}, {"type": "integer", "value": "9223372036854775807"}, {"type": "integer", "value": "123456789012345678901234567890"}]}}
+-- 450-fractionals.xfer --
+[ 1.5 -0.25 1.50 6.02e23 1e5 1E-5 2.5e+3 1_000.000_1 ]
+-- 450-fractionals.canonical.xfer --
+[
+    1.5
+    -0.25
+    1.50
+    6.02e23
+    1e5
+    1E-5
+    2.5e+3
+    1_000.000_1
+]
+-- 450-fractionals.value.json --
+{"root": {"type": "sequence", "value": [{"type": "fractional", "value": "1.5"}, {"type": "fractional", "value": "-0.25"}, {"type": "fractional", "value": "1.50"}, {"type": "fractional", "value": "6.02e23"}, {"type": "fractional", "value": "1e5"}, {"type": "fractional", "value": "1E-5"}, {"type": "fractional", "value": "2.5e+3"}, {"type": "fractional", "value": "1000.0001"}]}}
+-- 460-temporals.xfer --
+[ 2025-08-01 09:30:00 09:30:00.250 2025-08-01T09:30:00Z 2025-08-01T09:30:00+08:00 2025-08-01T09:30:00 ]
+-- 460-temporals.canonical.xfer --
+[
+    2025-08-01
+    09:30:00
+    09:30:00.250
+    2025-08-01T09:30:00Z
+    2025-08-01T09:30:00+08:00
+    2025-08-01T09:30:00
+]
+-- 460-temporals.value.json --
+{"root": {"type": "sequence", "value": [{"type": "date", "value": "2025-08-01"}, {"type": "time", "value": "09:30:00"}, {"type": "time", "value": "09:30:00.250"}, {"type": "datetime", "value": "2025-08-01T09:30:00Z"}, {"type": "datetime", "value": "2025-08-01T09:30:00+08:00"}, {"type": "local-datetime", "value": "2025-08-01T09:30:00"}]}}
+-- 460-date-then-time-is-two-values.xfer --
+[ 2025-08-01 09:30:00 ]
+-- 460-date-then-time-is-two-values.canonical.xfer --
+[
+    2025-08-01
+    09:30:00
+]
+-- 460-date-then-time-is-two-values.value.json --
+{"root": {"type": "sequence", "value": [{"type": "date", "value": "2025-08-01"}, {"type": "time", "value": "09:30:00"}]}}
+-- 710-xfer-head.xfer --
+<! xfer 1 !>
+{ a 1 }
+-- 710-xfer-head.canonical.xfer --
+<! xfer 1 !>
+{
+    a 1
+}
+-- 710-xfer-head.value.json --
+{"xfer": 1, "root": {"type": "object", "value": {"a": {"type": "integer", "value": "1"}}}}
+-- 710-xfer-head-compact.xfer --
+<!xfer 1!>{a 1}
+-- 710-xfer-head-compact.canonical.xfer --
+<! xfer 1 !>
+{
+    a 1
+}
+-- 710-xfer-head-compact.value.json --
+{"xfer": 1, "root": {"type": "object", "value": {"a": {"type": "integer", "value": "1"}}}}
+-- 720-annotations-on-pair-and-element.xfer --
+{
+    <! id "main" !>
+    <! tag navigation !>
+    menu [
+        <! tag "experimental" !>
+        { title "Beta" }
+    ]
+}
+-- 720-annotations-on-pair-and-element.canonical.xfer --
+{
+    <! id "main" !>
+    <! tag navigation !>
+    menu [
+        <! tag "experimental" !>
+        {
+            title "Beta"
+        }
+    ]
+}
+-- 720-annotations-on-pair-and-element.value.json --
+{"root": {"type": "object", "value": {"menu": {"annotations": [{"name": "id", "value": {"type": "string", "value": "main"}}, {"name": "tag", "value": {"type": "symbol", "value": "navigation"}}], "type": "sequence", "value": [{"annotations": [{"name": "tag", "value": {"type": "string", "value": "experimental"}}], "type": "object", "value": {"title": {"type": "string", "value": "Beta"}}}]}}}}
+-- 720-annotation-lang-on-string.xfer --
+{
+    <! lang javascript !>
+    script ""console.log("hi")""
+}
+-- 720-annotation-lang-on-string.canonical.xfer --
+{
+    <! lang javascript !>
+    script ""console.log("hi")""
+}
+-- 720-annotation-lang-on-string.value.json --
+{"root": {"type": "object", "value": {"script": {"annotations": [{"name": "lang", "value": {"type": "symbol", "value": "javascript"}}], "type": "string", "value": "console.log(\"hi\")"}}}}
+-- 720-annotation-on-root.xfer --
+<! xfer 1 !>
+<! id "doc" !>
+[ 1 ]
+-- 720-annotation-on-root.canonical.xfer --
+<! xfer 1 !>
+<! id "doc" !>
+[
+    1
+]
+-- 720-annotation-on-root.value.json --
+{"xfer": 1, "root": {"annotations": [{"name": "id", "value": {"type": "string", "value": "doc"}}], "type": "sequence", "value": [{"type": "integer", "value": "1"}]}}

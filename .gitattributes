@@ -1,0 +1,3 @@
+* text=auto eol=lf
+tests/bytes/* -text
+*.txtar text eol=lf

@@ -1,0 +1,248 @@
+XferLang 1.0 conformance suite: documents that must not parse.
+Each case is <stem>.xfer and <stem>.diag (CODE line:column, or CODE *). See README.md.
+Byte-level cases (invalid UTF-8, limits) are individual files under bytes/.
+
+-- 101-adjacent-scalars.xfer --
+[ 1-2 ]
+-- 101-adjacent-scalars.diag --
+XFER0101 1:4
+-- 101-string-then-number.xfer --
+[ "a"1 ]
+-- 101-string-then-number.diag --
+XFER0101 1:6
+-- 101-symbol-then-string.xfer --
+{ a hello"x" }
+-- 101-symbol-then-string.diag --
+XFER0101 1:10
+-- 101-lowercase-t-in-datetime.xfer --
+2025-08-01t09:30:00
+-- 101-lowercase-t-in-datetime.diag --
+XFER0101 1:11
+-- 101-neg-inf-run-on.xfer --
+-infinity
+-- 101-neg-inf-run-on.diag --
+XFER0101 1:5
+-- 102-angle-not-comment-or-annotation.xfer --
+<"legacy explicit string">
+-- 102-angle-not-comment-or-annotation.diag --
+XFER0102 1:1
+-- 102-legacy-tuple-paren.xfer --
+( 1 2 )
+-- 102-legacy-tuple-paren.diag --
+XFER0103 1:1
+-- 103-legacy-boolean-sigil.xfer --
+{ a ~true }
+-- 103-legacy-boolean-sigil.diag --
+XFER0103 1:5
+-- 103-legacy-null-sigil.xfer --
+{ a ? }
+-- 103-legacy-null-sigil.diag --
+XFER0103 1:5
+-- 104-unterminated-comment.xfer --
+</ never closed
+{ a 1 }
+-- 104-unterminated-comment.diag --
+XFER0104 1:1
+-- 104-comment-run-mismatch.xfer --
+<// opened with two /> { a 1 }
+-- 104-comment-run-mismatch.diag --
+XFER0104 1:1
+-- 105-identifier-trailing-dot.xfer --
+{ a. 1 }
+-- 105-identifier-trailing-dot.diag --
+XFER0105 1:3
+-- 201-unterminated-string.xfer --
+{
+    a 1
+    b "unterminated
+    c 2
+}
+-- 201-unterminated-string.diag --
+XFER0201 3:7
+-- 201-stray-quote-is-unterminated.xfer --
+"a""
+-- 201-stray-quote-is-unterminated.diag --
+XFER0201 1:1
+-- 201-four-quotes-unterminated.xfer --
+""""
+-- 201-four-quotes-unterminated.diag --
+XFER0201 1:1
+-- 201-hash-run-mismatch.xfer --
+##"x"#
+-- 201-hash-run-mismatch.diag --
+XFER0201 1:1
+-- 202-hash-not-followed-by-quote.xfer --
+{ a #42 }
+-- 202-hash-not-followed-by-quote.diag --
+XFER0202 1:5
+-- 301-leading-zero.xfer --
+0755
+-- 301-leading-zero.diag --
+XFER0301 1:1
+-- 302-trailing-point.xfer --
+1.
+-- 302-trailing-point.diag --
+XFER0302 1:1
+-- 302-leading-point.xfer --
+.5
+-- 302-leading-point.diag --
+XFER0103 1:1
+-- 302-plus-sign.xfer --
++1
+-- 302-plus-sign.diag --
+XFER0103 1:1
+-- 302-double-underscore.xfer --
+1__0
+-- 302-double-underscore.diag --
+XFER0302 1:1
+-- 302-trailing-underscore.xfer --
+1_
+-- 302-trailing-underscore.diag --
+XFER0302 1:1
+-- 302-empty-hex.xfer --
+0x
+-- 302-empty-hex.diag --
+XFER0302 1:1
+-- 302-uppercase-radix.xfer --
+0XFF
+-- 302-uppercase-radix.diag --
+XFER0302 1:1
+-- 302-point-then-exponent.xfer --
+1.e5
+-- 302-point-then-exponent.diag --
+XFER0302 1:1
+-- 302-minus-alone.xfer --
+{ a - }
+-- 302-minus-alone.diag --
+XFER0302 1:5
+-- 302-minus-then-letters.xfer --
+{ a -x }
+-- 302-minus-then-letters.diag --
+XFER0302 1:5
+-- 304-reduced-time.xfer --
+09:30
+-- 304-reduced-time.diag --
+XFER0304 1:1
+-- 304-reduced-date.xfer --
+2025-08
+-- 304-reduced-date.diag --
+XFER0304 1:1
+-- 304-offset-without-colon.xfer --
+2025-08-01T09:30:00+0800
+-- 304-offset-without-colon.diag --
+XFER0304 1:1
+-- 305-invalid-date.xfer --
+2025-02-30
+-- 305-invalid-date.diag --
+XFER0305 1:1
+-- 305-invalid-time.xfer --
+25:00:00
+-- 305-invalid-time.diag --
+XFER0305 1:1
+-- 401-empty-document.xfer --
+-- 401-empty-document.diag --
+XFER0401 *
+-- 401-only-trivia.xfer --
+   </ nothing here />
+-- 401-only-trivia.diag --
+XFER0401 *
+-- 402-trailing-content.xfer --
+{ } 1
+-- 402-trailing-content.diag --
+XFER0402 1:5
+-- 402-date-space-time-at-root.xfer --
+2025-08-01 09:30:00
+-- 402-date-space-time-at-root.diag --
+XFER0402 1:12
+-- 402-two-roots.xfer --
+{ a 1 } { b 2 }
+-- 402-two-roots.diag --
+XFER0402 1:9
+-- 403-duplicate-key.xfer --
+{ a 1 a 2 }
+-- 403-duplicate-key.diag --
+XFER0403 1:7
+-- 403-duplicate-key-bare-and-quoted.xfer --
+{ a 1 "a" 2 }
+-- 403-duplicate-key-bare-and-quoted.diag --
+XFER0403 1:7
+-- 404-key-without-value.xfer --
+{ a 1 b }
+-- 404-key-without-value.diag --
+XFER0404 1:7
+-- 404-single-key.xfer --
+{ a }
+-- 404-single-key.diag --
+XFER0404 1:3
+-- 404-shifted-pairs.xfer --
+{ a b c d e f g }
+-- 404-shifted-pairs.diag --
+XFER0404 1:15
+-- 405-unterminated-object.xfer --
+{ a 1
+-- 405-unterminated-object.diag --
+XFER0405 1:1
+-- 405-unterminated-sequence.xfer --
+[ 1 2
+-- 405-unterminated-sequence.diag --
+XFER0405 1:1
+-- 406-unexpected-close.xfer --
+]
+-- 406-unexpected-close.diag --
+XFER0406 1:1
+-- 406-mismatched-close.xfer --
+{ a 1 ]
+-- 406-mismatched-close.diag --
+XFER0406 1:7
+-- 407-keyword-as-key.xfer --
+{ true 1 }
+-- 407-keyword-as-key.diag --
+XFER0407 1:3
+-- 407-number-as-key.xfer --
+{ 2025 "x" }
+-- 407-number-as-key.diag --
+XFER0407 1:3
+-- 408-legacy-recursive-pair.xfer --
+{ script javascript "body" }
+-- 408-legacy-recursive-pair.diag --
+XFER0404 1:21
+-- 501-nested-annotation.xfer --
+<! tag <! id "x" !> y !> 1
+-- 501-nested-annotation.diag --
+XFER0501 1:8
+-- 502-trailing-annotation-in-object.xfer --
+{ a 1 <! tag x !> }
+-- 502-trailing-annotation-in-object.diag --
+XFER0502 1:7
+-- 502-trailing-annotation-at-end.xfer --
+1 <! tag x !>
+-- 502-trailing-annotation-at-end.diag --
+XFER0402 1:3
+-- 503-xfer-not-first.xfer --
+</ c /> <! xfer 1 !> 1
+-- 503-xfer-not-first.diag --
+XFER0503 1:9
+-- 503-xfer-inside-object.xfer --
+{ <! xfer 1 !> a 1 }
+-- 503-xfer-inside-object.diag --
+XFER0503 1:3
+-- 504-unsupported-version.xfer --
+<! xfer 99 !> 1
+-- 504-unsupported-version.diag --
+XFER0504 1:1
+-- 505-duplicate-id.xfer --
+[ <! id "x" !> 1 <! id "x" !> 2 ]
+-- 505-duplicate-id.diag --
+XFER0505 1:18
+-- 506-unknown-annotation-legacy-document.xfer --
+<! document { version "1" } !> { a 1 }
+-- 506-unknown-annotation-legacy-document.diag --
+XFER0506 1:1
+-- 506-unknown-annotation-let.xfer --
+<! let x 1 !> { a 1 }
+-- 506-unknown-annotation-let.diag --
+XFER0506 1:1
+-- 506-level-2-template-head.xfer --
+<! xfer-template 1 !> { a _x }
+-- 506-level-2-template-head.diag --
+XFER0506 1:1
