@@ -228,12 +228,27 @@ Byte-level cases (BOM, CRLF, limits) are individual files under bytes/.
 [
     #"say "hi""#
     #""To be, or not to be""#
-    ##"a "# inside, and ends with #"##
+    """a "# inside, and ends with #"""
     #""""#
     ""
 ]
 -- 440-string-hash-run.value.json --
 {"root": {"type": "sequence", "value": [{"type": "string", "value": "say \"hi\""}, {"type": "string", "value": "\"To be, or not to be\""}, {"type": "string", "value": "a \"# inside, and ends with #"}, {"type": "string", "value": "\"\""}, {"type": "string", "value": ""}]}}
+-- 440-string-canonical-choice.xfer --
+[ "plain" #"x "y" z"# #"x ""y"" z"# #"a """ b"# #""a"# ###""a"##"### #"""# ##""#x""## ]
+-- 440-string-canonical-choice.canonical.xfer --
+[
+    "plain"
+    """x "y" z"""
+    """x ""y"" z"""
+    """"a """ b""""
+    #""a"#
+    ###""a"##"###
+    #"""#
+    ##""#x""##
+]
+-- 440-string-canonical-choice.value.json --
+{"root": {"type": "sequence", "value": [{"type": "string", "value": "plain"}, {"type": "string", "value": "x \"y\" z"}, {"type": "string", "value": "x \"\"y\"\" z"}, {"type": "string", "value": "a \"\"\" b"}, {"type": "string", "value": "\"a"}, {"type": "string", "value": "\"a\"##"}, {"type": "string", "value": "\""}, {"type": "string", "value": "\"#x\""}]}}
 -- 440-string-no-escapes.xfer --
 [ "^[a-z]+\d*$" "C:\Users\paul" "tab\there" ]
 -- 440-string-no-escapes.canonical.xfer --
