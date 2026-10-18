@@ -88,6 +88,9 @@ partial-time    = 2DIGIT ":" 2DIGIT ":" 2DIGIT ["." 1*DIGIT]
 time-offset     = %s"Z" / (("+" / "-") 2DIGIT ":" 2DIGIT)
 date-time       = full-date %s"T" partial-time [time-offset]
                   ; absent offset: a local date-time
+; The field ranges (month, day by month and leap year, hour, minute, second up
+; to 60, offset) cannot be written in ABNF; spec 4.6 states them (XFER0305).
+; A temporal takes no sign: "-2025-08-01" is an integer and a separation error.
 
 ; keywords, symbols, identifiers --------------------------------------------
 

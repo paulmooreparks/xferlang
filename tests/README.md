@@ -66,4 +66,7 @@ Implementations MUST also pass two generated tests, described here rather than e
 
 ## Adding a case
 
-Every rule in the specification has at least one valid and one invalid case. When a rule changes, its cases change in the same commit. Name cases by the rule they exercise, in kebab case, prefixed with a three-digit group number that matches the specification section (`4xx` lexical, `5xx` syntax, `6xx` canonical, `7xx` annotations, `8xx` JSON mapping is tested by the CLI, not here).
+Every rule in the specification has at least one valid and one invalid case. When a rule changes, its cases change in the same commit. Name cases by the rule they exercise, in kebab case, with a three-digit prefix:
+
+- A valid case is prefixed with the specification section it exercises, the section and subsection as digits: `440-` for section 4.4, `530-` for 5.3, `710-` for section 7.
+- An invalid case is prefixed with the number of the diagnostic code it requires: `101-` for `XFER0101`, `404-` for `XFER0404`. When a case requires more than one code, the prefix is the first.

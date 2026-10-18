@@ -120,7 +120,9 @@ An integer is an optional `-` followed by one of:
 
 A fractional is an optional `-` followed by a decimal integer form, then a fraction (`.` and at least one digit), an exponent (`e` or `E`, optional `+` or `-`, at least one digit), or both; or one of the special values `inf`, `-inf`, `nan`.
 
-In any number a single `_` MAY appear between two digits and nowhere else. A leading zero on a non-zero decimal integer is an error (`XFER0301`), so `0755` never means 755 or 493. `1.`, `.5`, `1.e5`, `+1` and `1__0` are errors (`XFER0302`). The radix prefixes are lowercase only. Any exponent makes a literal fractional: `1e5` is fractional and `100000` is an integer.
+In any number a single `_` MAY appear between two digits and nowhere else. A leading zero on a non-zero decimal integer is an error (`XFER0301`), so `0755` never means 755 or 493. `1.`, `1.e5`, `1__0`, `1_`, `1_a`, a `-` followed by neither digits nor `inf`, and a radix prefix with no digits after it are errors (`XFER0302`). The radix prefixes are lowercase only, and an uppercase one (`0XFF`, `0O17`, `0B1`) is also `XFER0302`. `.5` and `+1` are not numbers at all: `.` and `+` cannot begin a token (`XFER0103`, section 4). Any exponent makes a literal fractional: `1e5` is fractional and `100000` is an integer.
+
+`-inf` is a complete token wherever it appears, so `-infinity` is `-inf` followed by a separation error at the second `i`. Without the minus sign, `infinity` is an identifier like any other.
 
 A number's written form has no width. The value is the exact number the text denotes. An implementation MUST keep enough of the lexeme to deliver that value exactly to a consumer whose type can hold it, and MUST report a diagnostic (`XFER0303`) rather than wrap, truncate or silently promote when a consumer's type cannot. Whether a fractional becomes a decimal or a binary floating-point value is the consumer's choice; the implementation MUST say when the conversion is inexact.
 
@@ -132,7 +134,9 @@ A temporal is one of three RFC 3339 forms, spelled bare:
 - a time, `partial-time`: `09:30:00`, `09:30:00.250`;
 - a date-time, `full-date "T" partial-time [time-offset]`: `2025-08-01T09:30:00Z`, `2025-08-01T09:30:00+08:00`, and with no offset a local date-time `2025-08-01T09:30:00`.
 
-The separator between date and time is `T` only. RFC 3339's lowercase `t` and its space are excluded, the space because it would split the literal under the separation rule. Reduced forms (`09:30`, `2025-08`) are errors (`XFER0304`). A temporal whose fields are lexically well formed but denote no instant (`2025-02-30`, `25:00:00`) is an error (`XFER0305`). Durations are not part of this version.
+The separator between date and time is `T` only, and the UTC offset `Z` is uppercase only. RFC 3339's lowercase `t` and `z` and its space separator are excluded, the space because it would split the literal under the separation rule. A temporal takes no sign and no digit separator: `-2025-08-01` is the integer `-2025` followed by a separation error. Reduced forms (`09:30`, `2025-08`) and a fraction point with no digits after it are errors (`XFER0304`). Durations are not part of this version.
+
+A temporal whose fields are well formed but out of range is an error (`XFER0305`). The ranges are: the year is any four digits, `0000` to `9999`; the month is `01` to `12`; the day is `01` to the length of the month, where February has 29 days in a year divisible by 4, except a century year not divisible by 400; the hour is `00` to `23`; the minute is `00` to `59`; the second is `00` to `60`, where `60` is a leap second as RFC 3339 permits; an offset's hour is `00` to `23` and its minute `00` to `59`. A fraction of a second may have any number of digits. So `2024-02-29` and `23:59:60` are valid, and `2023-02-29`, `1900-02-29`, `24:00:00` and `+24:00` are not.
 
 The three forms are three types. A date is not a date-time with a missing time; the consumer decides what to do with each.
 
@@ -154,7 +158,7 @@ An element is zero or more annotations (section 7) followed by a value. A value 
 
 ### 5.3 Objects
 
-An object is `{`, trivia, zero or more pairs separated by trivia, trivia, `}`. A pair is zero or more annotations, a key, trivia, and a value. A key is an identifier or a string; a keyword is not an identifier, so a key that spells a keyword is written as a string. Any other token in key position (a keyword, a number, a temporal, a bracket) is an error (`XFER0407`). The whitespace between a key and its value may be omitted only when the value begins with a self-delimiting token (separation rule).
+An object is `{`, trivia, zero or more pairs separated by trivia, trivia, `}`. A pair is zero or more annotations, a key, trivia, and a value. A key is an identifier or a string; a keyword is not an identifier, so a key that spells a keyword is written as a string. Any other token in key position (a keyword, a number, a temporal, a bracket) is an error (`XFER0407`). The whitespace between a key and its value may be omitted only when the value begins with a self-delimiting token (separation rule): `{a[1]}` is well formed, and `{a"x"}` is not, because a string is not self-delimiting.
 
 Pairs are ordered, and an implementation MUST preserve their order in the tree and in canonical output. Two pairs with the same key (compared as scalar-value sequences, whether spelled bare or as a string) are an error (`XFER0403`).
 
@@ -235,6 +239,8 @@ The mapping from JSON is lossless apart from duplicate keys. The mapping to JSON
 A conformant parser MUST NOT fail by exception, signal or abort on any input. It returns a result containing zero or more diagnostics and, where any part of the input was understood, a tree.
 
 A **diagnostic** has a code from this specification, a severity (error, warning, informational), a position (UTF-8 byte offset and length, and line and column counted in scalar values from 1), and a message. The suite compares codes and positions, not messages.
+
+Positions are measured in the normalized text (section 3.2): after the leading byte order mark is removed and line endings are replaced by LF. So the first character after a byte order mark is at offset 0, column 1, and a lone CR in the input ends a line. A diagnostic about the input as a whole, such as invalid UTF-8 or the document size, is reported at offset 0, line 1, column 1.
 
 A parser SHOULD recover at the next element boundary it can isolate and continue, so that a document with several faults reports each one the parser can separate. Some faults have no boundary to recover at (an unterminated string consumes the rest of the document) and the spec does not require recovery from them. A tree returned with errors is partial and MUST mark the regions it could not parse.
 
