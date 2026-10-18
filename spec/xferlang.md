@@ -40,9 +40,9 @@ Every conformant parser MUST accept any document within the following minimums, 
 
 | Limit | Minimum a parser MUST accept | Diagnostic when exceeded |
 |---|---|---|
-| Document size | 2^31 − 1 bytes | `XFER0601` |
+| Document size | 2^28 − 1 bytes | `XFER0601` |
 | Nesting depth (objects and sequences) | 256 | `XFER0602` |
-| Scalar token length | 2^31 − 1 bytes | `XFER0603` |
+| Scalar token length | 2^28 − 1 bytes | `XFER0603` |
 | Delimiter run length (quotes, hashes, slashes) | 64 | `XFER0604` |
 | Elements in a document | 2^31 − 1 | `XFER0605` |
 
@@ -83,17 +83,19 @@ An identifier in value position is a **symbol**. A symbol is a value of its own 
 
 A string has two spellings. Both yield a sequence of scalar values taken verbatim from the text between the delimiters: there are no escape sequences, and nothing between the delimiters is interpreted.
 
-**Repetition.** The opening delimiter is a maximal run of n ≥ 1 `"`. The closing delimiter is the first following maximal run of exactly n `"`. A run of any other length is content. Consequently the content may contain quote runs of any length other than n, and may not begin or end with `"` (a leading quote would be part of the opening run; a trailing quote would merge with the closing run into a run that is not n). One special case: exactly two `"` followed by anything other than `"` is the empty string.
+**Repetition.** The opening delimiter is a maximal run of n `"`, where n is 1 or at least 3. The closing delimiter is the first following maximal run of exactly n `"`. A run of any other length is content. Consequently the content may contain quote runs of any length other than n, and may not begin or end with `"` (a leading quote would be part of the opening run; a trailing quote would merge with the closing run into a run that is not n).
+
+**The empty string.** A maximal run of exactly two `"` that begins a token is the empty string, whatever follows it. It never opens a string: `""x""` is the empty string followed by a separation error at `x`. Content that contains a quote is therefore written with a run of three or more, as in Python, C#, Kotlin, Swift and Java. Inside a string's content a run of two quotes is ordinary content.
 
 ```xfer
 "plain"
 ""
-""He said "hello" and left.""
+"""He said "hello" and left."""
 """Content with "" inside"""
 "Content with "" inside"
 ```
 
-The last two are the same string. The fifth is well formed because a run of two is not a run of one; the canonical form (section 6) would write the fourth.
+The last two are the same string. The fifth is well formed because the run of two is content of a string opened with one quote; the canonical form (section 6) would write the fourth.
 
 **Hash-run.** The opening delimiter is a run of m ≥ 1 `#` followed by `"`. The closing delimiter is the first following `"` that is followed by a maximal run of exactly m `#`. A `"` followed by a hash run of any other length, or by no hash, is content. The content may begin and end with anything. Hash-run has no exception: every string is representable with m one greater than the longest run of `#` that follows a `"` in the content.
 
@@ -183,7 +185,7 @@ Rules:
 7. Numbers are written as in the source except that the hexadecimal digits of a hexadecimal integer are lowercased. Digit separators and radix are preserved. Special floats are written `inf`, `-inf`, `nan`.
 8. Temporals are written as in the source.
 9. Keywords and symbols are written as spelled.
-10. Strings use the choice rule: if the content contains no `"`, write `"content"`. Otherwise, if the content neither begins nor ends with `"`, write repetition with n one greater than the longest quote run in the content. Otherwise write hash-run with m one greater than the longest run of `#` that follows a `"` in the content. If "one greater than the longest" would exceed the run-length limit, use instead the smallest length that is not the length of any run in the content, which exists and is within the limit.
+10. Strings use the choice rule: if the content is empty, write `""`. If the content contains no `"`, write `"content"`. Otherwise, if the content neither begins nor ends with `"`, write repetition with n one greater than the longest quote run in the content, or 3 when that would be 2 (a run of two is the empty string). Otherwise write hash-run with m one greater than the longest run of `#` that follows a `"` in the content. If the chosen length would exceed the run-length limit, use instead the smallest length that is not the length of any run in the content, and is not 2 for repetition; it exists and is within the limit.
 
 Canonical form is idempotent: the canonical form of a canonical document is itself.
 

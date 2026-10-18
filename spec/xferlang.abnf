@@ -57,11 +57,13 @@ RBRACK          = "]"
 
 ; strings -------------------------------------------------------------------
 
-string          = rep-string / hash-string
-rep-string      = 1*DQUOTE *string-char 1*DQUOTE          ; C1; see spec 4.4
+string          = empty-string / rep-string / hash-string
+empty-string    = 2DQUOTE                                  ; a maximal run of exactly
+                  ; two quotes is always the empty string, whatever follows
+rep-string      = rep-run *string-char rep-run              ; C1; see spec 4.4
+rep-run         = DQUOTE / 3*DQUOTE                         ; one, or three or more
                   ; the opening run is maximal; the content may not begin or
-                  ; end with DQUOTE; exactly two DQUOTE followed by a
-                  ; non-DQUOTE is the empty string
+                  ; end with DQUOTE
 hash-string     = 1*"#" DQUOTE *string-char DQUOTE 1*"#"  ; C1; see spec 4.4
 string-char     = <any scalar value>                      ; subject to C1
 

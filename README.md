@@ -10,7 +10,7 @@ Any text can be placed inside an XferLang string without modification, at any de
     name "greeter"
     language javascript
     updated 2025-08-01T09:30:00Z
-    script ""function greet(name) { console.log("Hello, " + name + "!"); }""
+    script """function greet(name) { console.log("Hello, " + name + "!"); }"""
     tags [ demo "web apps" ]
     </ The entry below is switched off. />
     </ { name "farewell" script "..." } />

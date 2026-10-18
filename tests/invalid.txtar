@@ -246,6 +246,10 @@ XFER0506 1:1
 <! xfer-template 1 !> { a _x }
 -- 506-level-2-template-head.diag --
 XFER0506 1:1
+-- 101-two-quotes-then-text.xfer --
+""He said""
+-- 101-two-quotes-then-text.diag --
+XFER0101 1:3
 -- 101-signed-date.xfer --
 -2025-08-01
 -- 101-signed-date.diag --

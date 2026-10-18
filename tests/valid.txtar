@@ -207,10 +207,10 @@ Byte-level cases (BOM, CRLF, limits) are individual files under bytes/.
 -- 440-string-plain-and-empty.value.json --
 {"root": {"type": "sequence", "value": [{"type": "string", "value": "Hello, world"}, {"type": "string", "value": ""}, {"type": "string", "value": "a"}]}}
 -- 440-string-repetition.xfer --
-[ ""He said "hello" and left."" """Content with "" inside""" "Content with "" inside" ]
+[ """He said "hello" and left.""" """Content with "" inside""" "Content with "" inside" ]
 -- 440-string-repetition.canonical.xfer --
 [
-    ""He said "hello" and left.""
+    """He said "hello" and left."""
     """Content with "" inside"""
     """Content with "" inside"""
 ]
@@ -268,23 +268,32 @@ Second line.
 -- 440-string-embedding-two-levels.xfer --
 {
     modules [
-        """{
+        """"{
     name "greeter"
-    script ""function greet(name) { console.log("Hello, " + name + "!"); }""
-}"""
+    script """function greet(name) { console.log("Hello, " + name + "!"); }"""
+}""""
     ]
 }
 -- 440-string-embedding-two-levels.canonical.xfer --
 {
     modules [
-        """{
+        """"{
     name "greeter"
-    script ""function greet(name) { console.log("Hello, " + name + "!"); }""
-}"""
+    script """function greet(name) { console.log("Hello, " + name + "!"); }"""
+}""""
     ]
 }
 -- 440-string-embedding-two-levels.value.json --
-{"root": {"type": "object", "value": {"modules": {"type": "sequence", "value": [{"type": "string", "value": "{\n    name \"greeter\"\n    script \"\"function greet(name) { console.log(\"Hello, \" + name + \"!\"); }\"\"\n}"}]}}}}
+{"root": {"type": "object", "value": {"modules": {"type": "sequence", "value": [{"type": "string", "value": "{\n    name \"greeter\"\n    script \"\"\"function greet(name) { console.log(\"Hello, \" + name + \"!\"); }\"\"\"\n}"}]}}}}
+-- 440-string-empty-beside-brackets.xfer --
+["" ""]
+-- 440-string-empty-beside-brackets.canonical.xfer --
+[
+    ""
+    ""
+]
+-- 440-string-empty-beside-brackets.value.json --
+{"root": {"type": "sequence", "value": [{"type": "string", "value": ""}, {"type": "string", "value": ""}]}}
 -- 450-integers.xfer --
 [ 0 -0 42 -7 1_000_000 0xFF 0xff -0x1F 0o755 0b1010_1010 9_223_372_036_854_775_807 123456789012345678901234567890 ]
 -- 450-integers.canonical.xfer --
@@ -385,12 +394,12 @@ Second line.
 -- 720-annotation-lang-on-string.xfer --
 {
     <! lang javascript !>
-    script ""console.log("hi")""
+    script """console.log("hi")"""
 }
 -- 720-annotation-lang-on-string.canonical.xfer --
 {
     <! lang javascript !>
-    script ""console.log("hi")""
+    script """console.log("hi")"""
 }
 -- 720-annotation-lang-on-string.value.json --
 {"root": {"type": "object", "value": {"script": {"annotations": [{"name": "lang", "value": {"type": "symbol", "value": "javascript"}}], "type": "string", "value": "console.log(\"hi\")"}}}}
