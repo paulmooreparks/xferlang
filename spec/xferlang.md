@@ -18,7 +18,7 @@ Three properties hold for every conformant implementation. They are stated first
 
 **The whitespace invariant.** Outside string literals and comments, whitespace carries no meaning beyond separating tokens. Whitespace between a scalar token and a following scalar token is mandatory and may be any non-empty run; whitespace adjacent to a self-delimiting token is optional. Replacing any whitespace run with any other run permitted by these rules does not change the document's value. In particular, line breaks never carry meaning, and no construct runs to the end of a line.
 
-**The explicitness invariant.** Every value's type is determined by its spelling alone. No value is ever coerced to another type by its content, position or neighbours. The only bare words with meaning are the five keywords in section 4.7.
+**The explicitness invariant.** Every value's type is determined by its spelling alone. No value is ever coerced to another type by its content, position or neighbours. The only bare words with meaning are the keywords in section 4.2.
 
 ## 3. Text
 
@@ -150,7 +150,7 @@ The three forms are three types. A date is not a date-time with a missing time; 
 
 ### 5.1 Document
 
-A document is optional trivia, an optional version annotation (section 7), optional trivia, exactly one element, and optional trivia. A document with no element is an error (`XFER0401`). Anything other than trivia after the element is an error (`XFER0402`). A sequence of concatenated documents is not a document.
+A document is optional whitespace, an optional version annotation (section 7), optional trivia, exactly one element, and optional trivia. The version annotation may be preceded by whitespace but not by a comment: a comment before it makes `<! xfer 1 !>` an ordinary annotation named `xfer`, which is `XFER0503`. A document with no element is an error (`XFER0401`). Anything other than trivia after the element is an error (`XFER0402`). A sequence of concatenated documents is not a document.
 
 The root element may be any value, including a scalar. `42` and `"text"` are complete documents.
 

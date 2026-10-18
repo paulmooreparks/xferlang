@@ -250,6 +250,18 @@ XFER0506 1:1
 ""He said""
 -- 101-two-quotes-then-text.diag --
 XFER0101 1:3
+-- 101-json-colon.xfer --
+{ "a": 1 }
+-- 101-json-colon.diag --
+XFER0101 1:6
+-- 101-json-comma.xfer --
+{ a 1, b 2 }
+-- 101-json-comma.diag --
+XFER0101 1:6
+-- 101-annotation-name-touching-string.xfer --
+<! tag"x" !> 1
+-- 101-annotation-name-touching-string.diag --
+XFER0101 1:7
 -- 101-signed-date.xfer --
 -2025-08-01
 -- 101-signed-date.diag --

@@ -20,7 +20,9 @@
 
 ; ---------------------------------------------------------------- document
 
-document        = *trivia [xfer-head *trivia] element *trivia
+document        = *ws [xfer-head *trivia] element *trivia
+                  ; a comment before the xfer head makes it an ordinary
+                  ; annotation (XFER0503); see spec 5.1 and 7
 xfer-head       = %s"<!" *trivia %s"xfer" 1*trivia dec-int *trivia %s"!>"
                   ; dec-int is the major version; see spec 7
 
@@ -37,7 +39,9 @@ key             = identifier / string
 sequence        = LBRACK *trivia *(element *trivia) RBRACK
 
 annotation      = %s"<!" *trivia identifier 1*trivia value *trivia %s"!>"
-                  ; the value is a Level 0 value and carries no annotations
+                  ; the value is a Level 0 value and carries no annotations;
+                  ; whitespace between the name and the value may be omitted
+                  ; only when the value begins with a self-delimiting token (C2)
 
 ; ---------------------------------------------------------------- trivia
 

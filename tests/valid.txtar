@@ -403,6 +403,15 @@ Second line.
 }
 -- 720-annotation-lang-on-string.value.json --
 {"root": {"type": "object", "value": {"script": {"annotations": [{"name": "lang", "value": {"type": "symbol", "value": "javascript"}}], "type": "string", "value": "console.log(\"hi\")"}}}}
+-- 710-xfer-head-after-whitespace.xfer --
+
+   <! xfer 1 !>
+1
+-- 710-xfer-head-after-whitespace.canonical.xfer --
+<! xfer 1 !>
+1
+-- 710-xfer-head-after-whitespace.value.json --
+{"xfer": 1, "root": {"type": "integer", "value": "1"}}
 -- 720-annotation-on-root.xfer --
 <! xfer 1 !>
 <! id "doc" !>
