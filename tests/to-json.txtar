@@ -1,0 +1,72 @@
+XferLang 1.0 conformance suite: the XferLang to JSON mapping (spec 8.1).
+Each case is <stem>.xfer, <stem>.json, and optionally <stem>.diag and <stem>.options. See README.md.
+
+-- 810-members-and-nesting.xfer --
+{ a 1 b [ true null "x" ] c 1.50 d { } e [ ] f { g [ [ ] { } ] } }
+-- 810-members-and-nesting.json --
+{"a":1,"b":[true,null,"x"],"c":1.50,"d":{},"e":[],"f":{"g":[[],{}]}}
+-- 810-root-scalars.xfer --
+42
+-- 810-root-scalars.json --
+42
+-- 810-root-string.xfer --
+"text"
+-- 810-root-string.json --
+"text"
+-- 810-root-null.xfer --
+null
+-- 810-root-null.json --
+null
+-- 811-integers-in-every-radix.xfer --
+[ 0xFF 0o17 0b101 1_000 -7 -0 0 -0x1f ]
+-- 811-integers-in-every-radix.json --
+[255,15,5,1000,-7,0,0,-31]
+-- 811-fractionals.xfer --
+[ 1.5 1E5 2.5e+3 1_000.000_1 0e0 -3.14 1.50 ]
+-- 811-fractionals.json --
+[1.5,1E5,2.5e+3,1000.0001,0e0,-3.14,1.50]
+-- 811-integers-past-the-safe-range.xfer --
+[ 9007199254740992 9007199254740993 -9007199254740992 -9007199254740993 123456789012345678901234567890 ]
+-- 811-integers-past-the-safe-range.json --
+[9007199254740992,9007199254740993,-9007199254740992,-9007199254740993,123456789012345678901234567890]
+-- 811-integers-past-the-safe-range.diag --
+XFER0901 *
+-- 811-integers-as-strings.xfer --
+[ 9007199254740992 9007199254740993 -9007199254740993 5 ]
+-- 811-integers-as-strings.json --
+[9007199254740992,"9007199254740993","-9007199254740993",5]
+-- 811-integers-as-strings.diag --
+XFER0901 *
+-- 811-integers-as-strings.options --
+stringify-big-ints
+-- 812-no-json-form.xfer --
+[ 1 inf nan -inf 2 ]
+-- 812-no-json-form.json --
+[1,null,null,null,2]
+-- 812-no-json-form.diag --
+XFER0902 *
+-- 813-symbols-and-temporals.xfer --
+{ mode dark when 2025-08-01 at 09:30:00.250 stamp 2025-08-01T09:30:00Z local 2025-08-01T09:30:00 }
+-- 813-symbols-and-temporals.json --
+{"mode":"dark","when":"2025-08-01","at":"09:30:00.250","stamp":"2025-08-01T09:30:00Z","local":"2025-08-01T09:30:00"}
+-- 813-symbols-and-temporals.diag --
+XFER0903 *
+XFER0904 *
+-- 814-string-escaping.xfer --
+[ """a "q" \ b""" "x	y" "line1
+line2" "é 日 😀 </ ! \u" "" ]
+-- 814-string-escaping.json --
+["a \"q\" \\ b","x\ty","line1\nline2","é 日 😀 </ ! \\u",""]
+-- 814-keys-are-strings.xfer --
+{ "first name" 1 #"say "hi""# 2 a.b 3 "" 4 日本 5 "{ braces }" 6 }
+-- 814-keys-are-strings.json --
+{"first name":1,"say \"hi\"":2,"a.b":3,"":4,"日本":5,"{ braces }":6}
+-- 815-annotations-and-head-are-dropped.xfer --
+<! xfer 1 !>
+{ <! id "k" !> a [ <! tag t !> 1 ] b 2 }
+-- 815-annotations-and-head-are-dropped.json --
+{"a":[1],"b":2}
+-- 815-comments-are-dropped.xfer --
+</ top /> { a 1 </ inner /> b [ 1 </ x /> 2 ] }
+-- 815-comments-are-dropped.json --
+{"a":1,"b":[1,2]}

@@ -50,6 +50,31 @@ Each case is two entries:
 
 A runner requires that every listed diagnostic is reported with that code at that position. It permits further diagnostics, since recovery may report consequences of the first fault, but the listed ones must be present. A case with the single line `CODE *` requires the code at any position (used for limits and encoding).
 
+## to-json.txtar and from-json.txtar
+
+The JSON mapping (spec 8) is tested by two more archives, in the same txtar form.
+
+`to-json.txtar` cases are:
+
+| Entry | Contents |
+|---|---|
+| `<stem>.xfer` | The input document. |
+| `<stem>.json` | The compact JSON text the conversion must write (spec 8.1), followed by one LF. |
+| `<stem>.diag` | Optional. One line per diagnostic the conversion must report, as `CODE *`. Further diagnostics are permitted. |
+| `<stem>.options` | Optional. One option name per line. The only option is `stringify-big-ints`. |
+
+The input is parsed first, so it must be valid. A conversion that reports an error (`XFER0902`) still writes the JSON, with `null` in place of the value that has no mapping, and the case lists both.
+
+`from-json.txtar` cases are:
+
+| Entry | Contents |
+|---|---|
+| `<stem>.json` | The JSON text. |
+| `<stem>.xfer` | The canonical form of the document the conversion must produce. Absent when the conversion must produce no value. |
+| `<stem>.diag` | Optional. The diagnostics the conversion must report, as `CODE *`. A case with no `<stem>.xfer` has at least one error. |
+
+A runner converts the JSON, requires every listed diagnostic to be reported, and compares the canonical form of the result with `<stem>.xfer` byte for byte, or requires that there is no value when there is no `<stem>.xfer`.
+
 ## bytes/
 
 Cases whose bytes a text editor or version-control system would alter live as individual files under `bytes/`, protected by `.gitattributes`: byte order marks, CR and CRLF line endings, NUL and control characters inside strings, invalid UTF-8, and the limit cases. They use the same stem conventions as the archives (`<stem>.xfer` with either `.canonical.xfer` and `.value.json`, or `.diag`).

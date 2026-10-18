@@ -1,0 +1,226 @@
+XferLang 1.0 conformance suite: the JSON to XferLang mapping (spec 8.2).
+Each case is <stem>.json and, when a value results, <stem>.xfer (its canonical form); optionally <stem>.diag. See README.md.
+
+-- 820-members-and-nesting.json --
+{"a":1,"b":[true,null,"x"],"c":1.50,"d":{},"e":[],"f":{"g":[[],{}]}}
+-- 820-members-and-nesting.xfer --
+{
+    a 1
+    b [
+        true
+        null
+        "x"
+    ]
+    c 1.50
+    d {}
+    e []
+    f {
+        g [
+            []
+            {}
+        ]
+    }
+}
+-- 820-root-scalars.json --
+42
+-- 820-root-scalars.xfer --
+42
+-- 820-root-string.json --
+"text"
+-- 820-root-string.xfer --
+"text"
+-- 820-root-null.json --
+null
+-- 820-root-null.xfer --
+null
+-- 820-root-booleans.json --
+[true,false]
+-- 820-root-booleans.xfer --
+[
+    true
+    false
+]
+-- 820-whitespace-is-free.json --
+ 	{ "a" : [ 1 , 2 ] ,
+ "b" : { } }
+-- 820-whitespace-is-free.xfer --
+{
+    a [
+        1
+        2
+    ]
+    b {}
+}
+-- 821-numbers-keep-their-spelling.json --
+[0,-0,12345678901234567890,1.0,1e5,1E-5,-2.5e+3,0.5,-0.0]
+-- 821-numbers-keep-their-spelling.xfer --
+[
+    0
+    -0
+    12345678901234567890
+    1.0
+    1e5
+    1E-5
+    -2.5e+3
+    0.5
+    -0.0
+]
+-- 822-integer-and-fractional-are-different-types.json --
+[1,1.0,1e0]
+-- 822-integer-and-fractional-are-different-types.xfer --
+[
+    1
+    1.0
+    1e0
+]
+-- 823-escapes-are-decoded.json --
+["a\"b","\\","\/","tab\there","nl\nx","\u00e9\u65e5","\ud83d\ude00"]
+-- 823-escapes-are-decoded.xfer --
+[
+    """a"b"""
+    "\"
+    "/"
+    "tab	here"
+    "nl
+x"
+    "é日"
+    "😀"
+]
+-- 823-a-string-is-never-a-symbol.json --
+["dark","true","null","1"]
+-- 823-a-string-is-never-a-symbol.xfer --
+[
+    "dark"
+    "true"
+    "null"
+    "1"
+]
+-- 824-keys-that-need-quoting.json --
+{"first name":1,"true":2,"a.b":3,"":4,"日本":5,"inf":6,"9a":7}
+-- 824-keys-that-need-quoting.xfer --
+{
+    "first name" 1
+    "true" 2
+    a.b 3
+    "" 4
+    日本 5
+    "inf" 6
+    "9a" 7
+}
+-- 825-duplicate-keys-keep-the-last-value.json --
+{"a":1,"b":2,"a":3}
+-- 825-duplicate-keys-keep-the-last-value.xfer --
+{
+    a 3
+    b 2
+}
+-- 825-duplicate-keys-keep-the-last-value.diag --
+XFER0905 *
+-- 826-malformed-trailing-comma.json --
+{"a":1,}
+-- 826-malformed-trailing-comma.diag --
+XFER0906 *
+-- 826-malformed-array-trailing-comma.json --
+[1,]
+-- 826-malformed-array-trailing-comma.diag --
+XFER0906 *
+-- 826-malformed-single-quotes.json --
+{'a':1}
+-- 826-malformed-single-quotes.diag --
+XFER0906 *
+-- 826-malformed-leading-zero.json --
+[01]
+-- 826-malformed-leading-zero.diag --
+XFER0906 *
+-- 826-malformed-trailing-point.json --
+[1.]
+-- 826-malformed-trailing-point.diag --
+XFER0906 *
+-- 826-malformed-leading-point.json --
+[.5]
+-- 826-malformed-leading-point.diag --
+XFER0906 *
+-- 826-malformed-plus-sign.json --
+[+1]
+-- 826-malformed-plus-sign.diag --
+XFER0906 *
+-- 826-malformed-nan.json --
+[NaN]
+-- 826-malformed-nan.diag --
+XFER0906 *
+-- 826-malformed-infinity.json --
+[Infinity]
+-- 826-malformed-infinity.diag --
+XFER0906 *
+-- 826-malformed-missing-colon.json --
+{"a"}
+-- 826-malformed-missing-colon.diag --
+XFER0906 *
+-- 826-malformed-missing-comma.json --
+[1 2]
+-- 826-malformed-missing-comma.diag --
+XFER0906 *
+-- 826-malformed-unterminated-string.json --
+"abc
+-- 826-malformed-unterminated-string.diag --
+XFER0906 *
+-- 826-malformed-unterminated-array.json --
+[1,2
+-- 826-malformed-unterminated-array.diag --
+XFER0906 *
+-- 826-malformed-empty.json --
+-- 826-malformed-empty.diag --
+XFER0906 *
+-- 826-malformed-two-values.json --
+1 2
+-- 826-malformed-two-values.diag --
+XFER0906 *
+-- 826-malformed-comment.json --
+// no comments in JSON
+{"a":1}
+-- 826-malformed-comment.diag --
+XFER0906 *
+-- 826-malformed-raw-tab-in-string.json --
+["a	b"]
+-- 826-malformed-raw-tab-in-string.diag --
+XFER0906 *
+-- 826-malformed-bad-escape.json --
+["\x"]
+-- 826-malformed-bad-escape.diag --
+XFER0906 *
+-- 826-malformed-short-unicode-escape.json --
+["\u12"]
+-- 826-malformed-short-unicode-escape.diag --
+XFER0906 *
+-- 826-malformed-unquoted-key.json --
+{a:1}
+-- 826-malformed-unquoted-key.diag --
+XFER0906 *
+-- 826-malformed-literal-case.json --
+[True]
+-- 826-malformed-literal-case.diag --
+XFER0906 *
+-- 827-carriage-return-escape.json --
+["a\rb"]
+-- 827-carriage-return-escape.diag --
+XFER0907 *
+-- 827-carriage-return-unicode-escape.json --
+["\u000d"]
+-- 827-carriage-return-unicode-escape.diag --
+XFER0907 *
+-- 827-lone-high-surrogate.json --
+["\ud800"]
+-- 827-lone-high-surrogate.diag --
+XFER0907 *
+-- 827-lone-low-surrogate.json --
+["x\udc00y"]
+-- 827-lone-low-surrogate.diag --
+XFER0907 *
+-- 827-high-surrogate-then-text.json --
+["\ud83dx"]
+-- 827-high-surrogate-then-text.diag --
+XFER0907 *
+-- 827-carriage-return-in-a-key.json --
+{"a\rb":1}
+-- 827-carriage-return-in-a-key.diag --
+XFER0907 *

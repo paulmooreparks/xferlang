@@ -36,7 +36,9 @@ Whitespace is U+0020 (space), U+0009 (tab), U+000A (line feed) and U+000C (form 
 
 ### 3.4 Limits
 
-Every conformant parser MUST accept any document within the following minimums, and MAY accept larger. The spec fixes minimums so that two conformant parsers never disagree on a document within them.
+Every conformant parser, in its default configuration, MUST accept any document within the following minimums, and MAY accept larger. The spec fixes minimums so that two conformant parsers never disagree on a document within them.
+
+A deployment may choose stricter limits for its own purposes, such as a server that parses untrusted input and wants to refuse a document over a megabyte. An implementation SHOULD allow that as an explicit option. A parser so configured is not conformant for documents beyond the limits its caller chose, and reports the diagnostic in the table when it refuses one. The minimums bind the default configuration, not a deployment's policy.
 
 | Limit | Minimum a parser MUST accept | Diagnostic when exceeded |
 |---|---|---|
@@ -46,7 +48,7 @@ Every conformant parser MUST accept any document within the following minimums, 
 | Delimiter run length (quotes, hashes, slashes) | 64 | `XFER0604` |
 | Elements in a document | 2^31 − 1 | `XFER0605` |
 
-Nesting depth counts every open object or sequence including the root, so `[[1]]` has depth 2 and a document of 256 nested sequences MUST be accepted while one of 257 MAY be rejected by a parser at the minimum. Exceeding a limit is a diagnostic, never a crash, an allocation failure or a stack overflow. Implementations SHOULD expose the limits as options with the minimums as defaults.
+Nesting depth counts every open object or sequence including the root, so `[[1]]` has depth 2 and a document of 256 nested sequences MUST be accepted while one of 257 MAY be rejected by a parser at the minimum. Exceeding a limit is a diagnostic, never a crash, an allocation failure or a stack overflow. Implementations SHOULD expose the limits as options with the minimums as defaults, and a caller may raise or lower each.
 
 ## 4. Lexical structure
 
@@ -191,7 +193,7 @@ Canonical form is idempotent: the canonical form of a canonical document is itse
 
 ## 7. Annotations (Level 1)
 
-An annotation is `<!`, trivia, an identifier (the name), trivia, a value, trivia, `!>`. The value is a Level 0 value and MUST NOT itself carry annotations (`XFER0501`). An annotation attaches to the next pair when it appears inside an object and to the next element otherwise. Several annotations may precede one target and all attach to it. An annotation with no target (last in a collection, or last in a document) is an error (`XFER0502`).
+An annotation is `<!`, trivia, an identifier (the name), trivia, a value, trivia, `!>`. The value is a Level 0 value and MUST NOT itself carry annotations (`XFER0501`). An annotation attaches to the next pair when it appears inside an object and to the next element otherwise. Several annotations may precede one target and all attach to it. An annotation with no target is an error (`XFER0502`): one that is last in an object or a sequence, one with nothing after it in a document that has no element, and one placed between a key and its value. An annotation after the root element is not a dangling annotation but content after the root, which is `XFER0402`.
 
 The defined annotations are:
 
@@ -223,18 +225,26 @@ Annotations never evaluate, never read the environment or the file system, and n
 | temporal | string, as written | `XFER0904` (informational) |
 | comments, annotations | dropped | |
 
+An integer is written as decimal digits with a leading `-` when negative, whatever radix it was written in, so `0xFF` is `255` and `-0` is `0`. When `XFER0901` applies and the caller asked for strings, the integer is written as a JSON string of those digits; the warning is still reported, because the type changed. An `inf`, `-inf` or `nan` is reported and the converter writes `null` in its place, so that the output is still JSON.
+
+**The compact form.** The JSON text an implementation writes by default has no whitespace outside strings, and writes object members in the order of the value. A string is written between `"` characters with `"` and `\` escaped as `\"` and `\\`, the control characters U+0008, U+0009, U+000A, U+000C and U+000D as `\b`, `\t`, `\n`, `\f` and `\r`, every other control character below U+0020 as `\u` and four lower-case hexadecimal digits, and every other character literally (so U+007F, U+2028 and characters above U+FFFF are not escaped). A key is a string. An implementation MAY also offer an indented form. The compact form is what the conformance suite compares, so that two implementations writing the same value write the same bytes.
+
+A diagnostic from this direction has no position in the XferLang source, because it is about a value; an implementation SHOULD say where in the value it applies, as a JSON Pointer (RFC 6901), and SHOULD report the informational codes `XFER0903` and `XFER0904` once per conversion, with a count, rather than once per value.
+
 ### 8.2 JSON to XferLang
 
 | JSON | XferLang |
 |---|---|
 | object | object; on duplicate keys the last value wins with `XFER0905` (warning) |
 | array | sequence |
-| string | string, with JSON escapes decoded; never a symbol |
+| string | string, with JSON escapes decoded; never a symbol. A string that holds U+000D or a lone surrogate (from `\r` or an unpaired `\uD800` to `\uDFFF`) is not converted: `XFER0907` (error) |
 | number with no fraction or exponent | integer |
 | number with a fraction or exponent | fractional, spelled as in the source |
 | `true`, `false`, `null` | keywords |
 
-The mapping from JSON is lossless apart from duplicate keys. The mapping to JSON is defined and diagnosed, not lossless; a document that round-trips through JSON may come back with symbols and temporals as strings.
+An object key is a string for this purpose, so a key that holds one of those characters is `XFER0907` too. Malformed JSON is `XFER0906` (error) and gives no value. The reason for `XFER0907` is that XferLang cannot hold the character: a document is normalized before it is read (section 3.2), so U+000D would be read back as LF, and a lone surrogate is not a scalar value, so either would come back as a different value. A converter MUST report it and MUST NOT substitute another character.
+
+The mapping from JSON is lossless apart from duplicate keys and strings that hold U+000D or a lone surrogate, which are reported. The mapping to JSON is defined and diagnosed, not lossless; a document that round-trips through JSON may come back with symbols and temporals as strings.
 
 ## 9. Parsing results and the lossless tree
 
@@ -290,6 +300,8 @@ Codes are stable. A code is never reused for a different meaning; a retired code
 | XFER0903 | informational | symbol mapped to JSON string |
 | XFER0904 | informational | temporal mapped to JSON string |
 | XFER0905 | warning | duplicate key in JSON source; last value kept |
+| XFER0906 | error | malformed JSON |
+| XFER0907 | error | JSON string holds a character XferLang cannot represent |
 
 ## 11. Conformance
 
