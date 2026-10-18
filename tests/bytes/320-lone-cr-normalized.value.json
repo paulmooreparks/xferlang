@@ -1,2 +1,1 @@
-{"root": {"type": "object", "value": {"text": {"type": "string", "value": "a
-b"}}}}
+{"root": {"type": "object", "value": {"text": {"type": "string", "value": "a\nb"}}}}
