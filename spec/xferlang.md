@@ -262,6 +262,17 @@ A parser SHOULD recover at the next element boundary it can isolate and continue
 
 Implementations SHOULD provide a **lossless tree**, in which every byte of the source is reachable: tokens, trivia, delimiter run lengths, and the spelling of every number. A **value model** derived from it drops trivia and spellings and is what most consumers use. The canonical form (section 6) is a function of the value model plus annotations.
 
+**Values built by a program.** An implementation that lets a program build a value model directly, and then write it as a document, MUST refuse a value that no document could hold, and MUST NOT repair it, so that the output always reads back as exactly the value given. It reports the refusal as an error. A value is refused when:
+
+- a string or an object key contains U+000D, which normalization (section 3.2) would read back as U+000A, or a lone surrogate, which is not a scalar value;
+- a symbol is not an identifier (section 4.3) or is a keyword;
+- a number's spelling is not exactly one number token of its kind, or does not denote the value it is stored with (an integer spelled `7` that holds 5, for example);
+- a temporal's spelling is not exactly one temporal token of its kind;
+- an annotation has a name other than `id`, `tag` or `lang`, has a value of the wrong kind for its name, has a value that is a container or carries an annotation itself, or repeats an `id` already used in the document; or
+- the kind of a value is not one this specification defines.
+
+The `xfer` head is part of a document, not an annotation of a value, so a value model has no place to hold it.
+
 ## 10. Diagnostic codes
 
 Codes are stable. A code is never reused for a different meaning; a retired code is listed as retired.
