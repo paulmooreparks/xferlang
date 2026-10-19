@@ -256,7 +256,7 @@ A conformant parser MUST NOT fail by exception, signal or abort on any input. It
 
 A **diagnostic** has a code from this specification, a severity (error, warning, informational), a position (UTF-8 byte offset and length, and line and column counted in scalar values from 1), and a message. The suite compares codes and positions, not messages.
 
-Positions are measured in the normalized text (section 3.2): after the leading byte order mark is removed and line endings are replaced by LF. So the first character after a byte order mark is at offset 0, column 1, and a lone CR in the input ends a line. A diagnostic about the input as a whole, such as invalid UTF-8 or the document size, is reported at offset 0, line 1, column 1.
+Positions are measured in the normalized text (section 3.2): after the leading byte order mark is removed and line endings are replaced by LF. So the first character after a byte order mark is at offset 0, column 1, and a lone CR in the input ends a line. A diagnostic about the input as a whole, such as the document size, is reported at offset 0, line 1, column 1. Invalid UTF-8 (`XFER0701`) SHOULD be reported at the first byte that is not part of a valid sequence, with its offset counted in bytes from after the byte order mark and its line and column counted as for the normalized text before it. A parser on a platform whose decoder does not say where it failed MAY report it at offset 0, line 1, column 1, so the suite does not require a position for these cases.
 
 A parser SHOULD recover at the next element boundary it can isolate and continue, so that a document with several faults reports each one the parser can separate. Some faults have no boundary to recover at (an unterminated string consumes the rest of the document) and the spec does not require recovery from them. A tree returned with errors is partial and MUST mark the regions it could not parse. Where recovery happens, and so which further diagnostics follow the first fault, is a matter of quality and not of conformance: after a document's first fault, the suite requires only the diagnostics it lists, and a parser may report others. In particular a parser need not skip a malformed annotation to its closing `!>`, and it is better that it does not when the `!>` may simply be missing, because skipping would swallow a following closing bracket.
 
@@ -272,6 +272,8 @@ Implementations SHOULD provide a **lossless tree**, in which every byte of the s
 - the kind of a value is not one this specification defines.
 
 The `xfer` head is part of a document, not an annotation of a value, so a value model has no place to hold it.
+
+**Object mappers.** An implementation that maps values onto a host language's types (classes, records, structures) reports the faults of that mapping with the codes in the `08xx` range, so that every implementation's mapper reports the same code for the same fault: `XFER0801` for a value of a kind the target cannot take (a string where an integer is needed), `XFER0802` for a key that matches no member of the target when the caller has asked for unknown keys to be refused, `XFER0803` for a required member with no key, and `XFER0804` for two keys of one object that match the same member (for example under case-insensitive matching, or a key and an alias of it). A value of the right kind that the target cannot hold exactly (an integer out of range, a fraction the target would make infinite) is `XFER0303`. A mapping diagnostic is reported at the position of the value, key or object it concerns, where the source is known. How a mapper chooses members, names and conversions is outside this specification.
 
 ## 10. Diagnostic codes
 
@@ -310,6 +312,10 @@ Codes are stable. A code is never reused for a different meaning; a retired code
 | XFER0604 | error | delimiter run exceeds length limit |
 | XFER0605 | error | element count exceeds limit |
 | XFER0701 | error | invalid UTF-8 |
+| XFER0801 | error | value has the wrong kind for its target |
+| XFER0802 | error | key matches no member of the target |
+| XFER0803 | error | required member missing |
+| XFER0804 | error | two keys match one member |
 | XFER0901 | warning | integer outside JSON's safe range |
 | XFER0902 | error | special float has no JSON mapping |
 | XFER0903 | informational | symbol mapped to JSON string |
