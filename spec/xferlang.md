@@ -233,6 +233,8 @@ An integer is written as decimal digits with a leading `-` when negative, whatev
 
 A diagnostic from this direction has no position in the XferLang source, because it is about a value; an implementation SHOULD say where in the value it applies, as a JSON Pointer (RFC 6901), and SHOULD report the informational codes `XFER0903` and `XFER0904` once per conversion, with a count, rather than once per value.
 
+An indented form grows with the nesting depth as canonical output does (section 6), so a short document can have JSON text larger than any string an implementation can hold. A converter MAY refuse a value whose JSON text would exceed the document size limit (section 3.4). It then reports `XFER0601` and gives no text, and it MUST NOT fail by exception from the platform instead.
+
 ### 8.2 JSON to XferLang
 
 | JSON | XferLang |
