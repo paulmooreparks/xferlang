@@ -38,7 +38,7 @@ Whitespace is U+0020 (space), U+0009 (tab), U+000A (line feed) and U+000C (form 
 
 Every conformant parser, in its default configuration, MUST accept any document within the following minimums, and MAY accept larger. The spec fixes minimums so that two conformant parsers never disagree on a document within them.
 
-A deployment may choose stricter limits for its own purposes, such as a server that parses untrusted input and wants to refuse a document over a megabyte. An implementation SHOULD allow that as an explicit option. A parser so configured is not conformant for documents beyond the limits its caller chose, and reports the diagnostic in the table when it refuses one. The minimums bind the default configuration, not a deployment's policy.
+A deployment may choose stricter limits for its own purposes, such as a server that parses untrusted input and wants to refuse a document over a megabyte. An implementation SHOULD allow that as an explicit option. A parser so configured is not conformant for documents beyond the limits its caller chose, and reports the diagnostic in the table when it refuses one. The minimums bind the default configuration, not a deployment's policy. A parser that keeps a tree of the whole document may need many times the document's size in memory, and a runtime that cannot recover from running out of memory can be ended by a hostile document that is within every limit below, so a parser of untrusted input SHOULD be configured with limits well under the minimums.
 
 | Limit | Minimum a parser MUST accept | Diagnostic when exceeded |
 |---|---|---|
@@ -164,7 +164,7 @@ An element is zero or more annotations (section 7) followed by a value. A value 
 
 An object is `{`, trivia, zero or more pairs separated by trivia, trivia, `}`. A pair is zero or more annotations, a key, trivia, and a value. A key is an identifier or a string; a keyword is not an identifier, so a key that spells a keyword is written as a string. Any other token in key position (a keyword, a number, a temporal, a bracket) is an error (`XFER0407`). The whitespace between a key and its value may be omitted only when the value begins with a self-delimiting token (separation rule): `{a[1]}` is well formed, and `{a"x"}` is not, because a string is not self-delimiting.
 
-Pairs are ordered, and an implementation MUST preserve their order in the tree and in canonical output. Two pairs with the same key (compared as scalar-value sequences, whether spelled bare or as a string) are an error (`XFER0403`).
+Pairs are ordered, and an implementation MUST preserve their order in the tree and in canonical output. Two pairs with the same key (compared as scalar-value sequences, whether spelled bare or as a string) are an error (`XFER0403`). A tool that builds a value model from a tree that contains the error keeps the last value for the key; which position the key keeps is unspecified.
 
 An object body with an odd number of scalar tokens is an error (`XFER0404`). Because a bare word may be a key or a symbol value, a missing value shifts every later pair; the diagnostic MUST say that a value is missing and MUST list the key/value pairings the parser inferred, so the author can see where the shift began.
 
@@ -191,6 +191,8 @@ Rules:
 
 Canonical form is idempotent: the canonical form of a canonical document is itself.
 
+Indentation makes the size of canonical output grow with the square of the nesting depth, so a short document that is deeply nested can have canonical output larger than any string an implementation can hold. A canonical writer MAY refuse a value nested deeper than the depth limit (section 3.4), or whose canonical form would exceed the document size limit, and MUST report the refusal as an error and not fail by exception from the platform (an allocation failure, for example).
+
 ## 7. Annotations (Level 1)
 
 An annotation is `<!`, trivia, an identifier (the name), trivia, a value, trivia, `!>`. The value is a Level 0 value and MUST NOT itself carry annotations (`XFER0501`). An annotation attaches to the next pair when it appears inside an object and to the next element otherwise. Several annotations may precede one target and all attach to it. An annotation with no target is an error (`XFER0502`): one that is last in an object or a sequence, one with nothing after it in a document that has no element, and one placed between a key and its value. An annotation after the root element is not a dangling annotation but content after the root, which is `XFER0402`.
@@ -204,7 +206,7 @@ The defined annotations are:
 | `tag` | string or symbol | A classification of the target. Repeats are permitted. |
 | `lang` | symbol or string | For a string target: the language its content is written in, for editors. No effect on parsing. |
 
-Any other annotation name is an error (`XFER0506`). There is one parse mode. A tool that must carry unknown annotations through does so from the lossless tree (section 9), where every annotation is present whether or not it is defined here.
+Any other annotation name is an error (`XFER0506`). So is an annotation that is malformed in any other way (no name, a name that is not an identifier, an unclosed or empty body), and so is one whose value has the wrong kind for its name. The code is the same for all of these, because the suite compares codes and not messages, and the message says which fault it is. There is one parse mode. A tool that must carry unknown annotations through does so from the lossless tree (section 9), where every annotation is present whether or not it is defined here.
 
 Annotations never evaluate, never read the environment or the file system, and never change the value of their target.
 
@@ -217,7 +219,7 @@ Annotations never evaluate, never read the environment or the file system, and n
 | object | object, same key order | |
 | sequence | array | |
 | string | string, with JSON escaping applied | |
-| integer | number, full precision | `XFER0901` (warning) above 2^53 or below −2^53; an implementation MUST offer an option to emit such integers as strings instead |
+| integer | number, full precision | `XFER0901` (warning) above 2^53 or below −2^53 (2^53 itself is not flagged); an implementation MUST offer an option to emit such integers as strings instead |
 | fractional | number, as written with `_` removed | |
 | `inf`, `-inf`, `nan` | no mapping | `XFER0902` (error) |
 | `true`, `false`, `null` | `true`, `false`, `null` | |
@@ -244,7 +246,9 @@ A diagnostic from this direction has no position in the XferLang source, because
 
 An object key is a string for this purpose, so a key that holds one of those characters is `XFER0907` too. Malformed JSON is `XFER0906` (error) and gives no value. The reason for `XFER0907` is that XferLang cannot hold the character: a document is normalized before it is read (section 3.2), so U+000D would be read back as LF, and a lone surrogate is not a scalar value, so either would come back as a different value. A converter MUST report it and MUST NOT substitute another character.
 
-The mapping from JSON is lossless apart from duplicate keys and strings that hold U+000D or a lone surrogate, which are reported. The mapping to JSON is defined and diagnosed, not lossless; a document that round-trips through JSON may come back with symbols and temporals as strings.
+JSON nested deeper than the depth limit (section 3.4) is not converted. The converter reports `XFER0602` and gives no value, because the result would be a value that cannot be written as a document within the limit.
+
+The mapping from JSON is lossless apart from duplicate keys and strings that hold U+000D or a lone surrogate, which are reported, and nesting past the depth limit, which is refused. The mapping to JSON is defined and diagnosed, not lossless; a document that round-trips through JSON may come back with symbols and temporals as strings.
 
 ## 9. Parsing results and the lossless tree
 
@@ -254,7 +258,7 @@ A **diagnostic** has a code from this specification, a severity (error, warning,
 
 Positions are measured in the normalized text (section 3.2): after the leading byte order mark is removed and line endings are replaced by LF. So the first character after a byte order mark is at offset 0, column 1, and a lone CR in the input ends a line. A diagnostic about the input as a whole, such as invalid UTF-8 or the document size, is reported at offset 0, line 1, column 1.
 
-A parser SHOULD recover at the next element boundary it can isolate and continue, so that a document with several faults reports each one the parser can separate. Some faults have no boundary to recover at (an unterminated string consumes the rest of the document) and the spec does not require recovery from them. A tree returned with errors is partial and MUST mark the regions it could not parse.
+A parser SHOULD recover at the next element boundary it can isolate and continue, so that a document with several faults reports each one the parser can separate. Some faults have no boundary to recover at (an unterminated string consumes the rest of the document) and the spec does not require recovery from them. A tree returned with errors is partial and MUST mark the regions it could not parse. Where recovery happens, and so which further diagnostics follow the first fault, is a matter of quality and not of conformance: after a document's first fault, the suite requires only the diagnostics it lists, and a parser may report others. In particular a parser need not skip a malformed annotation to its closing `!>`, and it is better that it does not when the `!>` may simply be missing, because skipping would swallow a following closing bracket.
 
 Implementations SHOULD provide a **lossless tree**, in which every byte of the source is reachable: tokens, trivia, delimiter run lengths, and the spelling of every number. A **value model** derived from it drops trivia and spellings and is what most consumers use. The canonical form (section 6) is a function of the value model plus annotations.
 
