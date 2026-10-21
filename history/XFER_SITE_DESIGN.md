@@ -78,4 +78,7 @@ The site should go live early and grow, rather than wait for everything.
 
 ## 9. Decisions recorded
 
-(none yet)
+- **2026-10-22. The site runs on the parkscomputing engine as it is.** xfer.parkscomputing.com is another container from the engine image built in the parkscomputing repository, as padmajairam.com is, configured through the engine's `Site` settings in desktop mode. There is no fork of the engine. Features the site needs that the engine lacks (XferLang in the Editor, `xfer` in the terminal, serving a site's own tree beside the engine's built-in assets) are added to the engine for every site. The agent that maintains the parkscomputing repository does that work, from a brief this project writes.
+- **2026-10-22. The site's content is the repository `xfer-site`,** mounted into the container, rather than a folder in OneDrive as for parkscomputing.com and padmajairam.com, so that the content is versioned and reviewed like code. It holds the pages, the book, the diagnostic pages, the site's own applets and its `sitenav.xfer`.
+- **2026-10-22. The tunnel route exists.** Paul added xfer.parkscomputing.com to the Cloudflare tunnel. What remains is its entry in the tunnel's `config.yml`, once a container listens on a loopback port.
+- **2026-10-22. `xfer` in the terminal is the npm CLI itself.** `xfer-js` exports the CLI as a function that takes its files and streams from the caller, so the Node command and the site's terminal run the same code and print the same bytes.
