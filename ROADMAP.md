@@ -54,17 +54,21 @@ Each milestone has an exit criterion that can be checked rather than judged.
 
 Spec draft 1, ABNF, suite formats, about a hundred cases, the proposal closed with every decision recorded.
 
-### M1. First implementation green
+### M1. First implementation green (done 2026-10-21)
 
 `xfer-js` passes every case in the suite and both property tests, on Node, in a browser, in Deno and in Bun. The spec and suite have absorbed every fault the implementation found (round 3 of review is this process, not a separate reading). The hand-computed diagnostic positions in `tests/invalid.txtar` have been verified by a real parser.
 
 **Exit:** CI green on `xfer-js` with the suite pinned at a tagged commit of `xferlang`; `xferlang@0.1.0` published to npm as a prerelease.
 
-### M2. Second implementation green, first consumer migrated
+**Met.** `xfer-js` is green with the suite pinned at `v1.0.0-draft.1`, on Node 22 and 24 on three operating systems, with the built package also checked on Node 18 and 20, Deno, Bun, Chromium, Firefox and WebKit. `xferlang` is on npm under the `next` tag, at 0.1.0-next.4 by this date. Every fault the implementation found went into the specification and suite first; `history/FIRST_IMPLEMENTATION_FINDINGS.md` records them.
+
+### M2. Second implementation green, first consumer migrated (done 2026-10-21)
 
 `xfer-dotnet` passes the same suite. The two implementations have been run against each other on the suite, on the legacy repository's sample files, and on generated inputs, and every disagreement has been resolved in the spec and suite first. parkscomputing.com reads `sitenav.xfer` and `admin-menu.xfer` through `xfer-dotnet`.
 
 **Exit:** both CI green at the same `xferlang` tag; the live site serving from the new library; `ParksComputing.XferLang` 0.x published to NuGet.
+
+**Met.** `xfer-dotnet` and `xfer-js` are both green at `v1.0.0-draft.1`. Their CLIs are compared byte for byte, standard error included, in `xfer-dotnet`'s CI on three operating systems: on generated, damaged and random documents and JSON, on the legacy repository's 22 sample files and the 13 of them that convert, and on argument and stream handling. The disagreements found went into the specification first (the JSON output bound of section 8.1 among them). parkscomputing.com and its beta read their 1.0 `sitenav.xfer` and `admin-menu.xfer` through `ParksComputing.XferLang`, which is on NuGet at 0.1.0-next.0 with the `xfer` tool beside it.
 
 ### M3. The site, phase 1
 
